@@ -1,0 +1,382 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TodoApp.Uranium.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:converter="clr-namespace:TodoApp.Uranium.Libraries.Converters"
+    xmlns:local="clr-namespace:TodoApp.Uranium"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:TodoApp.Uranium.ViewModels"
+    Shell.NavBarIsVisible="False">
+    <ContentPage.Resources>
+        <converter:BoolToTextDecorationStrikeThroughConverter x:Key="BoolToTextDecorationStrikeThroughConverter" />
+        <converter:DateOnlyFormatConverter x:Key="DateOnlyFormatConverter" />
+    </ContentPage.Resources>
+    <ContentPage.BindingContext>
+        <vm:MainPageViewModel x:Name="vm" />
+    </ContentPage.BindingContext>
+    <AbsoluteLayout>
+        <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+            <Grid RowDefinitions="auto,70, *" RowSpacing="20">
+                <Border
+                    BackgroundColor="{StaticResource Primary}"
+                    HeightRequest="50"
+                    StrokeThickness="0"
+                    StyleClass="Elevation2">
+                    <StackLayout
+                        HorizontalOptions="CenterAndExpand"
+                        Orientation="Horizontal"
+                        VerticalOptions="Center">
+                        <Label
+                            FontSize="30"
+                            Text="TodoApp"
+                            TextColor="{StaticResource White}" />
+                    </StackLayout>
+                </Border>
+                <material:TextField
+                    Title="Search"
+                    Grid.Row="1"
+                    Margin="20,20,20,0"
+                    Padding="5"
+                    AllowClear="True"
+                    Icon="{FontImageSource FontFamily=MaterialRegular,
+                                           Glyph={x:Static m:MaterialRegular.Search}}"
+                    Text="{Binding TextSearch}">
+                    <material:TextField.Behaviors>
+                        <behaviors:EventToCommandBehavior Command="{Binding TextChangedToSearchCommand}" EventName="TextChanged" />
+                    </material:TextField.Behaviors>
+                </material:TextField>
+
+                <VerticalStackLayout Grid.Row="2" Spacing="20">
+                    <Border
+                        Margin="20,0"
+                        Padding="5"
+                        BackgroundColor="{StaticResource Primary}"
+                        IsVisible="{Binding OverdueListIsVisible}"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0">
+                        <Label
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="Overdue"
+                            TextColor="White" />
+                    </Border>
+
+                    <StackLayout BindableLayout.ItemsSource="{Binding OverdueTodoList}" IsVisible="{Binding OverdueListIsVisible}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="20,10,20,0"
+                                    Padding="10"
+                                    BackgroundColor="{StaticResource White}"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    StyleClass="Elevation2">
+                                    <Grid ColumnDefinitions="70, *, 70">
+                                        <CheckBox
+                                            Grid.Column="0"
+                                            HorizontalOptions="Start"
+                                            IsChecked="{Binding Status}">
+                                            <CheckBox.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapToChangeStatusCommand, Source={x:Reference vm}}" CommandParameter="{Binding .}" />
+                                            </CheckBox.GestureRecognizers>
+                                        </CheckBox>
+                                        <StackLayout Grid.Column="1">
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={x:Reference vm}, Path=TapEditTodoCommand}" CommandParameter="{Binding .}" />
+                                            </StackLayout.GestureRecognizers>
+                                            <Label
+                                                FontAttributes="Bold"
+                                                Text="{Binding Name}"
+                                                TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                            <Label Text="{Binding PrevisionDate, Converter={StaticResource DateOnlyFormatConverter}}" TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                        </StackLayout>
+                                        <Border
+                                            Grid.Column="2"
+                                            Padding="0,0,0,2"
+                                            BackgroundColor="Red"
+                                            HeightRequest="46"
+                                            StrokeShape="RoundRectangle 23"
+                                            StyleClass="Elevation1"
+                                            WidthRequest="46">
+                                            <ImageButton
+                                                Command="{Binding Source={x:Reference vm}, Path=TapDeleteTodoCommand}"
+                                                CommandParameter="{Binding .}"
+                                                WidthRequest="30">
+                                                <ImageButton.Source>
+                                                    <FontImageSource
+                                                        FontFamily="MaterialRegular"
+                                                        Glyph="{x:Static m:MaterialRegular.Delete}"
+                                                        Color="White" />
+                                                </ImageButton.Source>
+                                            </ImageButton>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                    <Border
+                        Margin="20,0"
+                        Padding="5"
+                        BackgroundColor="{StaticResource Primary}"
+                        IsVisible="{Binding TodayListIsVisible}"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0"
+                        StyleClass="Elevation2">
+                        <Label
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="Today"
+                            TextColor="White" />
+                    </Border>
+                    <StackLayout BindableLayout.ItemsSource="{Binding TodayFilteredTodoList}" IsVisible="{Binding TodayListIsVisible}">
+                        <BindableLayout.EmptyView>
+                            <Label
+                                Margin="20,10,20,0"
+                                Padding="10"
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="What do you want to do today ?"
+                                TextColor="{StaticResource Gray400}"
+                                VerticalOptions="Center" />
+                        </BindableLayout.EmptyView>
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="20,10,20,0"
+                                    Padding="10"
+                                    BackgroundColor="{StaticResource White}"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    StyleClass="Elevation2">
+                                    <Grid ColumnDefinitions="70, *, 70">
+                                        <CheckBox
+                                            Grid.Column="0"
+                                            HorizontalOptions="Start"
+                                            IsChecked="{Binding Status}">
+                                            <CheckBox.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapToChangeStatusCommand, Source={x:Reference vm}}" CommandParameter="{Binding .}" />
+                                            </CheckBox.GestureRecognizers>
+                                        </CheckBox>
+                                        <StackLayout Grid.Column="1">
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={x:Reference vm}, Path=TapEditTodoCommand}" CommandParameter="{Binding .}" />
+                                            </StackLayout.GestureRecognizers>
+                                            <Label
+                                                FontAttributes="Bold"
+                                                Text="{Binding Name}"
+                                                TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                            <Label Text="{Binding PrevisionDate, Converter={StaticResource DateOnlyFormatConverter}}" TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                        </StackLayout>
+                                        <Border
+                                            Grid.Column="2"
+                                            Padding="0,0,0,2"
+                                            BackgroundColor="Red"
+                                            HeightRequest="46"
+                                            Stroke="Red"
+                                            StrokeShape="RoundRectangle 23"
+                                            StyleClass="Elevation1"
+                                            WidthRequest="46">
+                                            <ImageButton
+                                                Command="{Binding Source={x:Reference vm}, Path=TapDeleteTodoCommand}"
+                                                CommandParameter="{Binding .}"
+                                                WidthRequest="30">
+                                                <ImageButton.Source>
+                                                    <FontImageSource
+                                                        FontFamily="MaterialRegular"
+                                                        Glyph="{x:Static m:MaterialRegular.Delete}"
+                                                        Color="White" />
+                                                </ImageButton.Source>
+                                            </ImageButton>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                    <Border
+                        Margin="20,0"
+                        Padding="5"
+                        BackgroundColor="{StaticResource Primary}"
+                        IsVisible="{Binding TomorrowListIsVisible}"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0"
+                        StyleClass="Elevation2">
+                        <Label
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="Tomorrow"
+                            TextColor="White" />
+                    </Border>
+
+                    <StackLayout BindableLayout.ItemsSource="{Binding TomorrowFilteredTodoList}" IsVisible="{Binding TomorrowListIsVisible}">
+                        <BindableLayout.EmptyView>
+                            <Label
+                                Margin="20,10,20,0"
+                                Padding="10"
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="What do you want to do tomorrow ?"
+                                TextColor="{StaticResource Gray400}"
+                                VerticalOptions="Center" />
+                        </BindableLayout.EmptyView>
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="20,10,20,0"
+                                    Padding="10"
+                                    BackgroundColor="{StaticResource White}"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    StyleClass="Elevation2">
+                                    <Grid ColumnDefinitions="70, *, 70">
+                                        <CheckBox
+                                            Grid.Column="0"
+                                            HorizontalOptions="Start"
+                                            IsChecked="{Binding Status}">
+                                            <CheckBox.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapToChangeStatusCommand, Source={x:Reference vm}}" CommandParameter="{Binding .}" />
+                                            </CheckBox.GestureRecognizers>
+                                        </CheckBox>
+                                        <StackLayout Grid.Column="1">
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={x:Reference vm}, Path=TapEditTodoCommand}" CommandParameter="{Binding .}" />
+                                            </StackLayout.GestureRecognizers>
+                                            <Label
+                                                FontAttributes="Bold"
+                                                Text="{Binding Name}"
+                                                TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                            <Label Text="{Binding PrevisionDate, Converter={StaticResource DateOnlyFormatConverter}}" TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                        </StackLayout>
+                                        <Border
+                                            Grid.Column="2"
+                                            Padding="0,0,0,2"
+                                            BackgroundColor="Red"
+                                            HeightRequest="46"
+                                            Stroke="Red"
+                                            StrokeShape="RoundRectangle 23"
+                                            StyleClass="Elevation1"
+                                            WidthRequest="46">
+                                            <ImageButton
+                                                Command="{Binding Source={x:Reference vm}, Path=TapDeleteTodoCommand}"
+                                                CommandParameter="{Binding .}"
+                                                WidthRequest="30">
+                                                <ImageButton.Source>
+                                                    <FontImageSource
+                                                        FontFamily="MaterialRegular"
+                                                        Glyph="{x:Static m:MaterialRegular.Delete}"
+                                                        Color="White" />
+                                                </ImageButton.Source>
+                                            </ImageButton>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                    <Border
+                        Margin="20,0"
+                        Padding="5"
+                        BackgroundColor="{StaticResource Primary}"
+                        IsVisible="{Binding NextWeekListIsVisible}"
+                        StrokeShape="RoundRectangle 10"
+                        StrokeThickness="0"
+                        StyleClass="Elevation2">
+                        <Label
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            Text="Next Week"
+                            TextColor="White" />
+                    </Border>
+
+                    <StackLayout BindableLayout.ItemsSource="{Binding NextWeekFilteredTodoList}" IsVisible="{Binding NextWeekListIsVisible}">
+                        <BindableLayout.EmptyView>
+                            <Label
+                                Margin="20,10,20,0"
+                                Padding="10"
+                                FontSize="16"
+                                HorizontalOptions="Center"
+                                Text="What do you want to do next week ?"
+                                TextColor="{StaticResource Gray400}"
+                                VerticalOptions="Center" />
+                        </BindableLayout.EmptyView>
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="20,10,20,0"
+                                    Padding="10"
+                                    BackgroundColor="{StaticResource White}"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    StyleClass="Elevation2">
+                                    <Grid ColumnDefinitions="70, *, 70">
+                                        <CheckBox
+                                            Grid.Column="0"
+                                            HorizontalOptions="Start"
+                                            IsChecked="{Binding Status}">
+                                            <CheckBox.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding TapToChangeStatusCommand, Source={x:Reference vm}}" CommandParameter="{Binding .}" />
+                                            </CheckBox.GestureRecognizers>
+                                        </CheckBox>
+                                        <StackLayout Grid.Column="1">
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={x:Reference vm}, Path=TapEditTodoCommand}" CommandParameter="{Binding .}" />
+                                            </StackLayout.GestureRecognizers>
+                                            <Label
+                                                FontAttributes="Bold"
+                                                Text="{Binding Name}"
+                                                TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                            <Label Text="{Binding PrevisionDate, Converter={StaticResource DateOnlyFormatConverter}}" TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}" />
+                                        </StackLayout>
+                                        <Border
+                                            Grid.Column="2"
+                                            Padding="0,0,0,2"
+                                            BackgroundColor="Red"
+                                            HeightRequest="46"
+                                            Stroke="Red"
+                                            StrokeShape="RoundRectangle 23"
+                                            StyleClass="Elevation1"
+                                            WidthRequest="46">
+                                            <ImageButton
+                                                Command="{Binding Source={x:Reference vm}, Path=TapDeleteTodoCommand}"
+                                                CommandParameter="{Binding .}"
+                                                WidthRequest="30">
+                                                <ImageButton.Source>
+                                                    <FontImageSource
+                                                        FontFamily="MaterialRegular"
+                                                        Glyph="{x:Static m:MaterialRegular.Delete}"
+                                                        Color="White" />
+                                                </ImageButton.Source>
+
+                                            </ImageButton>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                </VerticalStackLayout>
+            </Grid>
+
+        </ScrollView>
+        <Button
+            Margin="15"
+            Padding="0"
+            AbsoluteLayout.LayoutBounds="1,1,AutoSize,AutoSize"
+            AbsoluteLayout.LayoutFlags="PositionProportional"
+            Command="{Binding Source={x:Reference vm}, Path=TapCreateTodoCommand}"
+            CornerRadius="32"
+            FontAttributes="Bold"
+            FontSize="40"
+            HeightRequest="65"
+            HorizontalOptions="End"
+            StyleClass="Elevation3"
+            Text="+"
+            VerticalOptions="End"
+            WidthRequest="65 " />
+    </AbsoluteLayout>
+</ContentPage>

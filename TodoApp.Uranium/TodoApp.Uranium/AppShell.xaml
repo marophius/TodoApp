@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TodoApp.Uranium.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TodoApp.Uranium"
+    xmlns:views="clr-namespace:TodoApp.Uranium.Views"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.NavBarIsVisible="False">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="home" />
+
+    <ShellContent
+        Title="Create Todo"
+        ContentTemplate="{DataTemplate views:CreateTodoView}"
+        Route="create-todo" />
+
+    <ShellContent
+        Title="Edit Todo"
+        ContentTemplate="{DataTemplate views:EditTodoView}"
+        Route="edit-todo" />
+
+</Shell>

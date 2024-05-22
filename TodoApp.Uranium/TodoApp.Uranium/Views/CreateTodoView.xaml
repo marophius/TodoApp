@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="TodoApp.Uranium.Views.CreateTodoView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:TodoApp.Uranium.Libraries.Converters"
+    xmlns:input="clr-namespace:InputKit.Shared.Controls;assembly=InputKit.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialIcons;assembly=UraniumUI.Icons.MaterialIcons"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:validation="clr-namespace:InputKit.Shared.Validations;assembly=InputKit.Maui"
+    xmlns:vm="clr-namespace:TodoApp.Uranium.ViewModels"
+    Title="CreateTodoView">
+    <ContentPage.BindingContext>
+        <vm:CreateTodoViewModel x:Name="vm" />
+    </ContentPage.BindingContext>
+    <ContentPage.Resources>
+        <converters:BoolToTextDecorationStrikeThroughConverter x:Key="BoolToTextDecorationStrikeThroughConverter" />
+    </ContentPage.Resources>
+    <ScrollView>
+
+        <input:FormView>
+            <Grid RowDefinitions="*, auto">
+                <BoxView
+                    HeightRequest="5"
+                    VerticalOptions="Start"
+                    Color="{StaticResource Primary}" />
+                <VerticalStackLayout Padding="15" Spacing="10">
+                    <Border
+                        BackgroundColor="{StaticResource Primary}"
+                        HorizontalOptions="Start"
+                        StrokeShape="RoundRectangle 20"
+                        StrokeThickness="0">
+                        <ImageButton
+                            Padding="0"
+                            Command="{Binding Source={x:Reference vm}, Path=TapNavigateToHomeCommand}"
+                            HeightRequest="31"
+                            WidthRequest="31">
+                            <ImageButton.Source>
+                                <FontImageSource FontFamily="MaterialRegular" Glyph="{x:Static m:MaterialRegular.Arrow_left}" />
+                            </ImageButton.Source>
+                        </ImageButton>
+                    </Border>
+                    <VerticalStackLayout Spacing="15">
+                        <material:TextField
+                            Title="Name"
+                            Icon="{FontImageSource FontFamily=MaterialRegular,
+                                                   Glyph={x:Static m:MaterialRegular.Task}}"
+                            Text="{Binding Todo.Name}">
+                            <validation:RequiredValidation Message="Name is required" />
+                            <validation:MinLengthValidation Message="Name must have at least 5 characters" MinLength="5" />
+                        </material:TextField>
+                        <material:TextField
+                            x:Name="Mat_EditorField_Description"
+                            Title="Description"
+                            Margin="0"
+                            Icon="{FontImageSource FontFamily=MaterialRegular,
+                                                   Glyph={x:Static m:MaterialRegular.Description}}"
+                            Text="{Binding Todo.Description}">
+                            <validation:RequiredValidation Message="Description is required" />
+                            <validation:MinLengthValidation Message="Description must have at least 5 characters" MinLength="5" />
+                        </material:TextField>
+                        <material:DatePickerField
+                            x:Name="Mat_DatePicker_PrevisionDate"
+                            Title="Pick a Date"
+                            Date="{Binding Todo.PrevisionDate}"
+                            Format="dd/MM/yyyy"
+                            Icon="{FontImageSource FontFamily=MaterialRegular,
+                                                   Glyph={x:Static m:MaterialRegular.Date_range}}" />
+                        <StackLayout Orientation="Horizontal">
+                            <Label
+                                Margin="2,0,0,0"
+                                Text="Steps"
+                                VerticalOptions="Center" />
+                            <Button
+                                Padding="0"
+                                Command="{Binding Source={x:Reference vm}, Path=TapAddSubTaskCommand}"
+                                CornerRadius="15"
+                                FontFamily="OpenSansSemibold"
+                                HeightRequest="31"
+                                HorizontalOptions="EndAndExpand"
+                                Text="+"
+                                WidthRequest="31" />
+                        </StackLayout>
+                        <StackLayout x:Name="BindableLayout_Steps" BindableLayout.ItemsSource="{Binding Todo.SubTasks}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Margin="0,10,0,0"
+                                        Padding="10,0"
+                                        BackgroundColor="{StaticResource White}"
+                                        HeightRequest="60"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="0"
+                                        StyleClass="Elevation2">
+                                        <Grid ColumnDefinitions="30, *, 30">
+                                            <CheckBox IsChecked="{Binding Status}">
+                                                <CheckBox.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding TapEditSubTaskCommand, Source={x:Reference vm}}" CommandParameter="{Binding .}" />
+                                                </CheckBox.GestureRecognizers>
+                                            </CheckBox>
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding Name}"
+                                                TextDecorations="{Binding Status, Converter={StaticResource BoolToTextDecorationStrikeThroughConverter}}"
+                                                VerticalOptions="Center" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Margin="0,0,20,0"
+                                                Padding="5"
+                                                BackgroundColor="Red"
+                                                HeightRequest="40"
+                                                Stroke="Red"
+                                                StrokeShape="RoundRectangle 20"
+                                                StrokeThickness="1"
+                                                VerticalOptions="Center"
+                                                WidthRequest="40">
+                                                <ImageButton Command="{Binding Source={x:Reference vm}, Path=TapDeleteSubTaskCommand}" CommandParameter="{Binding .}">
+                                                    <ImageButton.Source>
+                                                        <FontImageSource
+                                                            FontFamily="MaterialRegular"
+                                                            Glyph="{x:Static m:MaterialRegular.Delete}"
+                                                            Color="White" />
+                                                    </ImageButton.Source>
+                                                </ImageButton>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+
+                        </StackLayout>
+                        <Button
+                            Grid.Row="1"
+                            Margin="15"
+                            Command="{Binding Source={x:Reference vm}, Path=TapToCreateTodoCommand}"
+                            HorizontalOptions="Center"
+                            Text="Create"
+                            VerticalOptions="End" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
+
+
+
+        </input:FormView>
+        <!--<VerticalStackLayout Padding="15" Spacing="10">
+
+        -->
+        <!--<Label
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    Text="Name" />
+                <Border Padding="5,0" StrokeShape="RoundRectangle 10">
+                    <Entry
+                        x:Name="Entry_TaskName"
+                        Placeholder="Task"
+                        Text="{Binding Todo.Name}" />
+                </Border>
+                <Label
+                    x:Name="Name_Label_Validation"
+                    FontSize="12"
+                    IsVisible="False"
+                    Text="Name must have at least 5 characters"
+                    TextColor="Red" />
+                <Label
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    Text="Description" />
+                <Border Padding="5,1" StrokeShape="RoundRectangle 10">
+                    <Editor
+                        x:Name="Editor_TaskDescription"
+                        HeightRequest="100"
+                        Placeholder="Description"
+                        Text="{Binding Todo.Description}" />
+                </Border>
+                <Label
+                    x:Name="Description_Label_Validation"
+                    FontSize="12"
+                    IsVisible="False"
+                    Text="Description must have at least 5 characters"
+                    TextColor="Red" />
+                <Label
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    Text="Prevision date" />
+                <Border StrokeShape="RoundRectangle 10">
+                    <DatePicker
+                        x:Name="DatePicker_TaskDate"
+                        Date="{Binding Todo.PrevisionDate}"
+                        Format="dd/MM/yyyy" />
+                </Border>
+                <Label
+                    x:Name="PrevisionDate_Label_Validation"
+                    FontSize="12"
+                    IsVisible="False"
+                    Text="Prevision date must have can't be less than current date."
+                    TextColor="Red" />-->
+        <!--
+
+
+
+            </VerticalStackLayout>-->
+
+
+    </ScrollView>
+</ContentPage>
